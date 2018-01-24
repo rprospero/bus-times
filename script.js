@@ -7,14 +7,16 @@ fetch("temp.json").then(function(response) {
     response.json().then(function(json) {
 	result = []
 	json.forEach(x =>
-		     result = result.concat(makeStops(x.bus, x.times)));
+		     result = result.concat(makeStops(x)));
 	result.sort((x, y) => x.time - y.time);
 	times = result;
-	localStorage.setItem("timetable", times)
     });
 });
 
-function makeStops(bus, ts) {
+function makeStops(x) {
+    bus = x.bus;
+    ts = x.times
+    toward = x.toward;
     tset = []
     ts.forEach(t => {
 	ts = t.split(":");
@@ -24,7 +26,7 @@ function makeStops(bus, ts) {
 	d.setHours(h);
 	d.setMinutes(m);
 	d.setSeconds(0);
-	tset.push({"bus": bus, "time":d});
+	tset.push({"bus": bus, "toward":toward, "time":d});
     });
     return tset;
 };
@@ -40,7 +42,8 @@ function makeEntry(stop, time) {
     hours = Math.floor(minutes/60);
     minutes -= 60*hours;
     return {"bus":stop.bus, "hours":hours,
-	    "minutes":minutes, "time":stop.time};
+	    "minutes":minutes, "time":stop.time,
+	    "toward":stop.toward};
 }
 
 function localTime(time) {
@@ -74,15 +77,24 @@ function tableCompare(xs, ys) {
     return true
 }
 
+//myloc is the observable which holds the user's current location
+loc = document.querySelector("#loc");
+myloc = Rx.Observable.fromEvent(loc, "change")
+    .map(x => x.target.value)
+    .startWith("Harwell");
+
 var options = document.querySelector('#options');
-// Rx.Observable.fromEvent(button, 'click')
+
+//This is the main observable that updates the table
 tables = Rx.Observable.interval(1000)
     .map(() => new Date)
-    // .map(x => x.toLocaleTimeString())
     .map(x => times.filter(y => x < y.time).map(q => makeEntry(q, x)))
-    .distinctUntilChanged(tableCompare);
+    .distinctUntilChanged(tableCompare)
 
-tables.subscribe(x => options.innerHTML = listToTable(x));
+localTimes = Rx.Observable.combineLatest(tables, myloc)
+    .map(x => x[0].filter(y => y.toward == x[1]))
+
+localTimes.subscribe(x => options.innerHTML = listToTable(x));
 
 Notification.requestPermission();
 tables.map(x => x[0])
