@@ -90,7 +90,7 @@ tables.map(x => x[0])
     .subscribe(x => new Notification("Next " + x.bus + " is leaving at "+localTime(x.time)));
 
 if("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js")
+    navigator.serviceWorker.register("serviceworker.js")
 	.then(function(registration) {
 	    console.log("Registration successful, scope is:", registration.scope);})
 	.catch(function(error) {
