@@ -2,6 +2,8 @@ x32homeTimes = ["12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "
 
 homeTimes98 = ["07:04", "07:40", "08:04", "08:41", "09:09", "09:39", "10:09", "10:39", "11:09", "11:39", "12:15", "12:45", "13:15", "13:45", "14:15", "14:45", "15:15", "15:40", "16:12", "16:40", "17:15", "17:43", "18:18", "18:46"];
 
+Notification.requestPermission();
+
 function makeStops(bus, ts) {
     tset = []
     ts.forEach(t => {
@@ -33,10 +35,14 @@ function makeEntry(stop, time) {
 	    "minutes":minutes, "time":stop.time};
 }
 
+function localTime(time) {
+    return time.getHours() + ":" + pad(time.getMinutes());
+}
+
 function displayEntry(entry){
     result = "\n<tr>";
     result += "<td>" + entry.bus + "</td>";
-    result += "<td>" + entry.time.getHours() + ":" + pad(entry.time.getMinutes()) + "</td>";
+    result += "<td>" + localTime(entry.time) + "</td>";
     result += "<td>" + entry.hours + "</td>";
     result += "<td>" + entry.minutes + "</td>";
     result += "</td>";
@@ -62,11 +68,14 @@ function tableCompare(xs, ys) {
 
 var options = document.querySelector('#options');
 // Rx.Observable.fromEvent(button, 'click')
-tables = Rx.Observable.interval(5000)
+tables = Rx.Observable.interval(1000)
     .map(() => new Date)
     // .map(x => x.toLocaleTimeString())
     .map(x => times.filter(y => x < y.time).map(q => makeEntry(q, x)))
     .distinctUntilChanged(tableCompare);
 
 tables.subscribe(x => options.innerHTML = listToTable(x));
-tables.subscribe(x => console.log(x[0]));
+
+tables.map(x => x[0])
+    .distinctUntilChanged((x, y) => x.time == y.time)
+    .subscribe(x => new Notification("Next " + x.bus + " is leaving at "+localTime(x.time)));
