@@ -1,13 +1,10 @@
 CACHE = "network-or-cache";
 
 self.addEventListener("install", function(evt) {
-    console.log("The service worker is being installed.");
     evt.waitUntil(precache());
 });
 
 self.addEventListener("fetch", function(evt) {
-    console.log("The service worker is serving the asset.");
-
     evt.respondWith(fromNetwork(evt.request, 400).catch(function () {
 	return fromCache(evt.request);
     }));
