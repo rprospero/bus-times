@@ -1,9 +1,19 @@
 times = []
+
+if(localStorage.getItem("timetable")) {
+    times = localStorage.getItem("timetable")
+    console.log(times)
+}
 fetch("temp.json").then(function(response) {
+    console.log(response);
     response.json().then(function(json) {
+	result = []
 	json.forEach(x =>
-		     times = times.concat(makeStops(x.bus, x.times)));
-	times.sort((x, y) => x.time - y.time);
+		     result = result.concat(makeStops(x.bus, x.times)));
+	console.log(result)
+	result.sort((x, y) => x.time - y.time);
+	times = result;
+	localStorage.setItem("timetable", times)
     });
 });
 
