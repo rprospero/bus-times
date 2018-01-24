@@ -1,8 +1,12 @@
 {
-  "name": "Harwell Bus Times",
-  "short_name": "Bus Times",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "description": "The bus times for Harwell Campus"
+    "name": "Harwell Bus Times",
+    "short_name": "Bus Times",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "description": "The bus times for Harwell Campus",
+    "icons": [
+	{"src": "bus.png",
+	 "type": "image/png",
+	 "sizes": "144x144"}]
 }
