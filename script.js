@@ -17,6 +17,11 @@ function makeStops(bus, ts) {
     return tset;
 };
 
+function pad(x) {
+    if(x>=10) return x;
+    return "0" + x
+};
+
 times = makeStops("X32", x32homeTimes).concat(makeStops("98", homeTimes98));
 times.sort((x, y) => x.time - y.time);
 
@@ -26,7 +31,7 @@ function makeEntry(stop, time) {
     minutes -= 60*hours;
     result = "\n<tr>";
     result += "<td>" + stop.bus + "</td>";
-    result += "<td>" + stop.time + "</td>";
+    result += "<td>" + stop.time.getHours() + ":" + pad(stop.time.getMinutes()) + "</td>";
     result += "<td>" + hours + "</td>";
     result += "<td>" + minutes + "</td>";
     result += "</td>";
