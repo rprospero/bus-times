@@ -88,3 +88,12 @@ Notification.requestPermission();
 tables.map(x => x[0])
     .distinctUntilChanged((x, y) => x.time == y.time)
     .subscribe(x => new Notification("Next " + x.bus + " is leaving at "+localTime(x.time)));
+
+if("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+	.then(function(registration) {
+	    console.log("Registration successful, scope is:", registration.scope);})
+	.catch(function(error) {
+	    console.log("Service worker registration failed, error:", error);
+	});
+}
