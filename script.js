@@ -29,27 +29,44 @@ function makeEntry(stop, time) {
     minutes = Math.round((stop.time-time)/60000);
     hours = Math.floor(minutes/60);
     minutes -= 60*hours;
+    return {"bus":stop.bus, "hours":hours,
+	    "minutes":minutes, "time":stop.time};
+}
+
+function displayEntry(entry){
     result = "\n<tr>";
-    result += "<td>" + stop.bus + "</td>";
-    result += "<td>" + stop.time.getHours() + ":" + pad(stop.time.getMinutes()) + "</td>";
-    result += "<td>" + hours + "</td>";
-    result += "<td>" + minutes + "</td>";
+    result += "<td>" + entry.bus + "</td>";
+    result += "<td>" + entry.time.getHours() + ":" + pad(entry.time.getMinutes()) + "</td>";
+    result += "<td>" + entry.hours + "</td>";
+    result += "<td>" + entry.minutes + "</td>";
     result += "</td>";
     return result;
 }
 
 function listToTable(xs) {
-    d = new Date
     result = "";
-    xs.forEach(x => result += makeEntry(x, d));
+    xs.forEach(x => result += displayEntry(x));
     return result;
 };
 
+function tableCompare(xs, ys) {
+    if(xs.length != ys.length) return false;
+    for(var i=0;i<xs.length;i++) {
+	if(xs[i].bus != ys[i].bus) return false;
+	if(xs[i].time != ys[i].time) return false;
+	if(xs[i].hours != ys[i].hours) return false;
+	if(xs[i].minutes != ys[i].minutes) return false;
+    }
+    return true
+}
+
 var options = document.querySelector('#options');
 // Rx.Observable.fromEvent(button, 'click')
-Rx.Observable.interval(100)
-    .audit(ev => Rx.Observable.interval(1000))
+tables = Rx.Observable.interval(5000)
     .map(() => new Date)
     // .map(x => x.toLocaleTimeString())
-    .map(x => times.filter(y => x < y.time))
-    .subscribe(x => options.innerHTML = listToTable(x));
+    .map(x => times.filter(y => x < y.time).map(q => makeEntry(q, x)))
+    .distinctUntilChanged(tableCompare);
+
+tables.subscribe(x => options.innerHTML = listToTable(x));
+tables.subscribe(x => console.log(x[0]));
