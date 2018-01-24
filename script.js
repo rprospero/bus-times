@@ -87,7 +87,9 @@ tables.subscribe(x => options.innerHTML = listToTable(x));
 Notification.requestPermission();
 tables.map(x => x[0])
     .distinctUntilChanged((x, y) => x.time == y.time)
-    .subscribe(x => navigator.serviceWorker.ready.showNotification("Next " + x.bus + " is leaving at "+localTime(x.time)));
+    .subscribe(x => navigator.serviceWorker.ready.then(
+	function(registration) {
+	    showNotification("Next " + x.bus + " is leaving at "+localTime(x.time))}));
 
 if("serviceWorker" in navigator) {
     navigator.serviceWorker.register("serviceworker.js")
