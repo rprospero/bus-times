@@ -1,8 +1,11 @@
-x32homeTimes = ["12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:32", "16:02", "16:31", "17:04", "17:28", "17:49", "18:06", "19:15", "19:23", "19:58", "21:10"];
-
-homeTimes98 = ["07:04", "07:40", "08:04", "08:41", "09:09", "09:39", "10:09", "10:39", "11:09", "11:39", "12:15", "12:45", "13:15", "13:45", "14:15", "14:45", "15:15", "15:40", "16:12", "16:40", "17:15", "17:43", "18:18", "18:46"];
-
-Notification.requestPermission();
+times = []
+fetch("temp.json").then(function(response) {
+    response.json().then(function(json) {
+	json.forEach(x =>
+		     times = times.concat(makeStops(x.bus, x.times)));
+	times.sort((x, y) => x.time - y.time);
+    });
+});
 
 function makeStops(bus, ts) {
     tset = []
@@ -24,8 +27,6 @@ function pad(x) {
     return "0" + x
 };
 
-times = makeStops("X32", x32homeTimes).concat(makeStops("98", homeTimes98));
-times.sort((x, y) => x.time - y.time);
 
 function makeEntry(stop, time) {
     minutes = Math.round((stop.time-time)/60000);
@@ -76,6 +77,7 @@ tables = Rx.Observable.interval(1000)
 
 tables.subscribe(x => options.innerHTML = listToTable(x));
 
+Notification.requestPermission();
 tables.map(x => x[0])
     .distinctUntilChanged((x, y) => x.time == y.time)
     .subscribe(x => new Notification("Next " + x.bus + " is leaving at "+localTime(x.time)));
