@@ -1,21 +1,15 @@
-var times = [];
+"use strict";
 
-if(localStorage.getItem("timetable")) {
-    times = localStorage.getItem("timetable");
-}
-
-fetchDataObservable = Rx.Observable.fromPromise(fetch("temp.json"))
+var timesObservable = Rx.Observable.fromPromise(fetch("temp.json"))
     .switchMap(response => Rx.Observable.fromPromise(response.json()))
-    .subscribe(json => {
-    	"use strict";
+    .map(json => {
     	var result = [];
     	json.forEach(x => result = result.concat(makeStops(x)));
     	result.sort((x,y) => x.time - y.time);
-    	times = result;
+	return result;
     });
 
 function makeStops(x) {
-    "use strict";
     var bus = x.bus;
     var ts = x.times;
     var toward = x.toward;
@@ -87,14 +81,18 @@ var myloc = Rx.Observable.fromEvent(loc, "change")
 
 var options = document.querySelector('#options');
 
-//This is the main observable that updates the table
-var tables = Rx.Observable.interval(1000)
-    .map(() => new Date())
-    .map(x => times.filter(y => x < y.time).map(q => makeEntry(q, x)))
+var times = Rx.Observable.interval(1000)
+    .map(() => new Date());
+
+var tables = Rx.Observable.combineLatest(times, timesObservable)
+    .map(lst => {
+	var x = lst[0];
+	var ts = lst[1];
+	return ts.filter(y => x < y.time).map(q => makeEntry(q, x));})
     .distinctUntilChanged(tableCompare);
 
 var localTimes = Rx.Observable.combineLatest(tables, myloc)
-    .map(x => x[0].filter(y => y.toward == x[1]));
+    .map(args => args[0].filter(y => y.toward == args[1]));
 
 localTimes.subscribe(x => options.innerHTML = listToTable(x));
 
