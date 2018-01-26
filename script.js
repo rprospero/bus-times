@@ -1,11 +1,11 @@
-times = []
+times = [];
 
 if(localStorage.getItem("timetable")) {
-    times = localStorage.getItem("timetable")
+    times = localStorage.getItem("timetable");
 }
 fetch("temp.json").then(function(response) {
     response.json().then(function(json) {
-	result = []
+	result = [];
 	json.forEach(x =>
 		     result = result.concat(makeStops(x)));
 	result.sort((x, y) => x.time - y.time);
@@ -15,26 +15,26 @@ fetch("temp.json").then(function(response) {
 
 function makeStops(x) {
     bus = x.bus;
-    ts = x.times
+    ts = x.times;
     toward = x.toward;
-    tset = []
+    tset = [];
     ts.forEach(t => {
 	ts = t.split(":");
 	h = Number(ts[0]);
 	m = Number(ts[1]);
-	d = new Date;
+	d = new Date();
 	d.setHours(h);
 	d.setMinutes(m);
 	d.setSeconds(0);
 	tset.push({"bus": bus, "toward":toward, "time":d});
     });
     return tset;
-};
+}
 
 function pad(x) {
     if(x>=10) return x;
-    return "0" + x
-};
+    return "0" + x;
+}
 
 
 function makeEntry(stop, time) {
@@ -64,7 +64,7 @@ function listToTable(xs) {
     result = "";
     xs.forEach(x => result += displayEntry(x));
     return result;
-};
+}
 
 function tableCompare(xs, ys) {
     if(xs.length != ys.length) return false;
@@ -74,7 +74,7 @@ function tableCompare(xs, ys) {
 	if(xs[i].hours != ys[i].hours) return false;
 	if(xs[i].minutes != ys[i].minutes) return false;
     }
-    return true
+    return true;
 }
 
 //myloc is the observable which holds the user's current location
@@ -87,12 +87,12 @@ var options = document.querySelector('#options');
 
 //This is the main observable that updates the table
 tables = Rx.Observable.interval(1000)
-    .map(() => new Date)
+    .map(() => new Date())
     .map(x => times.filter(y => x < y.time).map(q => makeEntry(q, x)))
-    .distinctUntilChanged(tableCompare)
+    .distinctUntilChanged(tableCompare);
 
 localTimes = Rx.Observable.combineLatest(tables, myloc)
-    .map(x => x[0].filter(y => y.toward == x[1]))
+    .map(x => x[0].filter(y => y.toward == x[1]));
 
 localTimes.subscribe(x => options.innerHTML = listToTable(x));
 
@@ -101,7 +101,7 @@ tables.map(x => x[0])
     .distinctUntilChanged((x, y) => x.time == y.time)
     .subscribe(x => navigator.serviceWorker.ready.then(
 	function(registration) {
-	    registration.showNotification("Next " + x.bus + " is leaving at "+localTime(x.time))}));
+	    registration.showNotification("Next " + x.bus + " is leaving at "+localTime(x.time));}));
 
 if("serviceWorker" in navigator) {
     navigator.serviceWorker.register("serviceworker.js")
