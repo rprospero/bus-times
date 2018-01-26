@@ -4,17 +4,18 @@ if(localStorage.getItem("timetable")) {
     times = localStorage.getItem("timetable");
 }
 
-fetch("temp.json").then(function(response) {
-    response.json().then(function(json) {
-	var result = [];
-	json.forEach(x =>
-		     result = result.concat(makeStops(x)));
-	result.sort((x, y) => x.time - y.time);
-	times = result;
+fetchDataObservable = Rx.Observable.fromPromise(fetch("temp.json"))
+    .switchMap(response => Rx.Observable.fromPromise(response.json()))
+    .subscribe(json => {
+    	"use strict";
+    	var result = [];
+    	json.forEach(x => result = result.concat(makeStops(x)));
+    	result.sort((x,y) => x.time - y.time);
+    	times = result;
     });
-});
 
 function makeStops(x) {
+    "use strict";
     var bus = x.bus;
     var ts = x.times;
     var toward = x.toward;
