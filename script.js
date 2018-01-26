@@ -1,11 +1,12 @@
-times = [];
+var times = [];
 
 if(localStorage.getItem("timetable")) {
     times = localStorage.getItem("timetable");
 }
+
 fetch("temp.json").then(function(response) {
     response.json().then(function(json) {
-	result = [];
+	var result = [];
 	json.forEach(x =>
 		     result = result.concat(makeStops(x)));
 	result.sort((x, y) => x.time - y.time);
@@ -14,15 +15,15 @@ fetch("temp.json").then(function(response) {
 });
 
 function makeStops(x) {
-    bus = x.bus;
-    ts = x.times;
-    toward = x.toward;
-    tset = [];
+    var bus = x.bus;
+    var ts = x.times;
+    var toward = x.toward;
+    var tset = [];
     ts.forEach(t => {
-	ts = t.split(":");
-	h = Number(ts[0]);
-	m = Number(ts[1]);
-	d = new Date();
+	var time = t.split(":");
+	var h = Number(time[0]);
+	var m = Number(time[1]);
+	var d = new Date();
 	d.setHours(h);
 	d.setMinutes(m);
 	d.setSeconds(0);
@@ -38,8 +39,8 @@ function pad(x) {
 
 
 function makeEntry(stop, time) {
-    minutes = Math.round((stop.time-time)/60000);
-    hours = Math.floor(minutes/60);
+    var minutes = Math.round((stop.time-time)/60000);
+    var hours = Math.floor(minutes/60);
     minutes -= 60*hours;
     return {"bus":stop.bus, "hours":hours,
 	    "minutes":minutes, "time":stop.time,
@@ -51,7 +52,7 @@ function localTime(time) {
 }
 
 function displayEntry(entry){
-    result = "\n<tr>";
+    var result = "\n<tr>";
     result += "<td>" + entry.bus + "</td>";
     result += "<td>" + localTime(entry.time) + "</td>";
     result += "<td>" + entry.hours + "</td>";
@@ -61,7 +62,7 @@ function displayEntry(entry){
 }
 
 function listToTable(xs) {
-    result = "";
+    var result = "";
     xs.forEach(x => result += displayEntry(x));
     return result;
 }
@@ -78,20 +79,20 @@ function tableCompare(xs, ys) {
 }
 
 //myloc is the observable which holds the user's current location
-loc = document.querySelector("#loc");
-myloc = Rx.Observable.fromEvent(loc, "change")
+var loc = document.querySelector("#loc");
+var myloc = Rx.Observable.fromEvent(loc, "change")
     .map(x => x.target.value)
     .startWith("Harwell");
 
 var options = document.querySelector('#options');
 
 //This is the main observable that updates the table
-tables = Rx.Observable.interval(1000)
+var tables = Rx.Observable.interval(1000)
     .map(() => new Date())
     .map(x => times.filter(y => x < y.time).map(q => makeEntry(q, x)))
     .distinctUntilChanged(tableCompare);
 
-localTimes = Rx.Observable.combineLatest(tables, myloc)
+var localTimes = Rx.Observable.combineLatest(tables, myloc)
     .map(x => x[0].filter(y => y.toward == x[1]));
 
 localTimes.subscribe(x => options.innerHTML = listToTable(x));

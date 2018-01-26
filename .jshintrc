@@ -1,3 +1,13 @@
 {
-  "esversion": 6
+    "esversion": 6,
+    "globals": {
+	"console": false,
+	"navigator": false,
+	"Notification": false,
+	"Rx": false,
+	"document": false,
+	"localStorage": false,
+	"fetch": false
+    },
+    "strict": true
 }
