@@ -77,7 +77,7 @@ function tableCompare(xs, ys) {
 var loc = document.querySelector("#loc");
 var myloc = Rx.Observable.fromEvent(loc, "change")
     .map(x => x.target.value)
-    .startWith("Harwell");
+    .startWith(document.getElementById("loc").value);
 
 var options = document.querySelector('#options');
 
